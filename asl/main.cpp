@@ -59,7 +59,7 @@ int main(int argc, const char* argv[]) {
     std::cout << "Usage: ./main [<file>]" << std::endl;
     return EXIT_FAILURE;
   }
-  if (argc == 2 and not std::fopen(argv[1], "r")) {
+  if (argc == 2 && !std::fopen(argv[1], "r")) {
     std::cout << "No such file: " << argv[1] << std::endl;
     return EXIT_FAILURE;
   }
@@ -86,7 +86,7 @@ int main(int argc, const char* argv[]) {
   antlr4::tree::ParseTree *tree = parser.program();
 
   // check for lexical or syntactical errors
-  if (lexer.getNumberOfSyntaxErrors() > 0 or
+  if (lexer.getNumberOfSyntaxErrors() > 0 ||
       parser.getNumberOfSyntaxErrors() > 0) {
     std::cout << "Lexical and/or syntactical errors have been found." << std::endl;
     return EXIT_FAILURE;

@@ -207,7 +207,7 @@ antlrcpp::Any CodeGenVisitor::visitWriteString(AslParser::WriteStringContext *ct
         code = code || instruction::WRITELN();
         i += 2;
       }
-      else if (s[i+1] == 't' or s[i+1] == '"' or s[i+1] == '\\') {
+      else if (s[i+1] == 't' || s[i+1] == '"' || s[i+1] == '\\') {
         code = code ||
                instruction::CHLOAD(temp, s.substr(i,2)) ||
 	       instruction::WRITEC(temp);

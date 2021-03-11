@@ -120,10 +120,10 @@ antlrcpp::Any TypeCheckVisitor::visitAssignStmt(AslParser::AssignStmtContext *ct
   visit(ctx->expr());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->left_expr());
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
-  if ((not Types.isErrorTy(t1)) and (not Types.isErrorTy(t2)) and
-      (not Types.copyableTypes(t1, t2)))
+  if ((!Types.isErrorTy(t1)) && (!Types.isErrorTy(t2)) &&
+      (!Types.copyableTypes(t1, t2)))
     Errors.incompatibleAssignment(ctx->ASSIGN());
-  if ((not Types.isErrorTy(t1)) and (not getIsLValueDecor(ctx->left_expr())))
+  if ((!Types.isErrorTy(t1)) && (!getIsLValueDecor(ctx->left_expr())))
     Errors.nonReferenceableLeftExpr(ctx->left_expr());
   DEBUG_EXIT();
   return 0;
@@ -133,7 +133,7 @@ antlrcpp::Any TypeCheckVisitor::visitIfStmt(AslParser::IfStmtContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->expr());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
-  if ((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1)))
+  if ((!Types.isErrorTy(t1)) && (!Types.isBooleanTy(t1)))
     Errors.booleanRequired(ctx);
   visit(ctx->statements());
   DEBUG_EXIT();
@@ -144,7 +144,7 @@ antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->ident());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
-  if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) {
+  if (!Types.isFunctionTy(t1) && !Types.isErrorTy(t1)) {
     Errors.isNotCallable(ctx->ident());
   }
   DEBUG_EXIT();
@@ -155,10 +155,10 @@ antlrcpp::Any TypeCheckVisitor::visitReadStmt(AslParser::ReadStmtContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->left_expr());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->left_expr());
-  if ((not Types.isErrorTy(t1)) and (not Types.isPrimitiveTy(t1)) and
-      (not Types.isFunctionTy(t1)))
+  if ((!Types.isErrorTy(t1)) && (!Types.isPrimitiveTy(t1)) &&
+      (!Types.isFunctionTy(t1)))
     Errors.readWriteRequireBasic(ctx);
-  if ((not Types.isErrorTy(t1)) and (not getIsLValueDecor(ctx->left_expr())))
+  if ((!Types.isErrorTy(t1)) && (!getIsLValueDecor(ctx->left_expr())))
     Errors.nonReferenceableExpression(ctx);
   DEBUG_EXIT();
   return 0;
@@ -168,7 +168,7 @@ antlrcpp::Any TypeCheckVisitor::visitWriteExpr(AslParser::WriteExprContext *ctx)
   DEBUG_ENTER();
   visit(ctx->expr());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
-  if ((not Types.isErrorTy(t1)) and (not Types.isPrimitiveTy(t1)))
+  if ((!Types.isErrorTy(t1)) && (!Types.isPrimitiveTy(t1)))
     Errors.readWriteRequireBasic(ctx);
   DEBUG_EXIT();
   return 0;
@@ -198,8 +198,8 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
   visit(ctx->expr(1));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
-  if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))) or
-      ((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
+  if (((!Types.isErrorTy(t1)) && (!Types.isNumericTy(t1))) ||
+      ((!Types.isErrorTy(t2)) && (!Types.isNumericTy(t2))))
     Errors.incompatibleOperator(ctx->op);
   TypesMgr::TypeId t = Types.createIntegerTy();
   putTypeDecor(ctx, t);
@@ -215,8 +215,8 @@ antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ct
   visit(ctx->expr(1));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
   std::string oper = ctx->op->getText();
-  if ((not Types.isErrorTy(t1)) and (not Types.isErrorTy(t2)) and
-      (not Types.comparableTypes(t1, t2, oper)))
+  if ((!Types.isErrorTy(t1)) && (!Types.isErrorTy(t2)) &&
+      (!Types.comparableTypes(t1, t2, oper)))
     Errors.incompatibleOperator(ctx->op);
   TypesMgr::TypeId t = Types.createBooleanTy();
   putTypeDecor(ctx, t);
