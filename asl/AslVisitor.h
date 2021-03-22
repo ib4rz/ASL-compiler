@@ -23,11 +23,17 @@ public:
 
     virtual antlrcpp::Any visitFunction(AslParser::FunctionContext *context) = 0;
 
+    virtual antlrcpp::Any visitParameters(AslParser::ParametersContext *context) = 0;
+
     virtual antlrcpp::Any visitDeclarations(AslParser::DeclarationsContext *context) = 0;
+
+    virtual antlrcpp::Any visitArray_decl(AslParser::Array_declContext *context) = 0;
 
     virtual antlrcpp::Any visitVariable_decl(AslParser::Variable_declContext *context) = 0;
 
     virtual antlrcpp::Any visitType(AslParser::TypeContext *context) = 0;
+
+    virtual antlrcpp::Any visitBasic_type(AslParser::Basic_typeContext *context) = 0;
 
     virtual antlrcpp::Any visitStatements(AslParser::StatementsContext *context) = 0;
 
@@ -35,7 +41,11 @@ public:
 
     virtual antlrcpp::Any visitIfStmt(AslParser::IfStmtContext *context) = 0;
 
+    virtual antlrcpp::Any visitWhileStmt(AslParser::WhileStmtContext *context) = 0;
+
     virtual antlrcpp::Any visitProcCall(AslParser::ProcCallContext *context) = 0;
+
+    virtual antlrcpp::Any visitRetStmt(AslParser::RetStmtContext *context) = 0;
 
     virtual antlrcpp::Any visitReadStmt(AslParser::ReadStmtContext *context) = 0;
 
@@ -51,7 +61,15 @@ public:
 
     virtual antlrcpp::Any visitRelational(AslParser::RelationalContext *context) = 0;
 
+    virtual antlrcpp::Any visitIndexer(AslParser::IndexerContext *context) = 0;
+
+    virtual antlrcpp::Any visitUnary(AslParser::UnaryContext *context) = 0;
+
+    virtual antlrcpp::Any visitParenthesis(AslParser::ParenthesisContext *context) = 0;
+
     virtual antlrcpp::Any visitValue(AslParser::ValueContext *context) = 0;
+
+    virtual antlrcpp::Any visitLogical(AslParser::LogicalContext *context) = 0;
 
     virtual antlrcpp::Any visitIdent(AslParser::IdentContext *context) = 0;
 
