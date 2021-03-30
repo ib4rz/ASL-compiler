@@ -85,9 +85,11 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   // Symbols.print();
   Symbols.popScope();
   std::string ident = ctx->ID()->getText();
+  // Function already declared
   if (Symbols.findInCurrentScope(ident)) {
     Errors.declaredIdent(ctx->ID());
   }
+  // Add function to SymTable
   else {
     std::vector<TypesMgr::TypeId> lParamsTy;
     TypesMgr::TypeId tRet = Types.createVoidTy();
@@ -110,9 +112,11 @@ antlrcpp::Any SymbolsVisitor::visitVariable_decl(AslParser::Variable_declContext
   visit(ctx->type());
   for (auto idCtx : ctx->ID()) {
     std::string ident = idCtx->getText();
+    // Variable already declared
     if (Symbols.findInCurrentScope(ident)) {
       Errors.declaredIdent(idCtx);
     }
+    // Add variable to SymTable
     else {
       TypesMgr::TypeId t1 = getTypeDecor(ctx->type());
       Symbols.addLocalVar(ident, t1);
@@ -124,13 +128,41 @@ antlrcpp::Any SymbolsVisitor::visitVariable_decl(AslParser::Variable_declContext
 
 antlrcpp::Any SymbolsVisitor::visitType(AslParser::TypeContext *ctx) {
   DEBUG_ENTER();
-  if (ctx->basic_type()) 
+  if (ctx->basic_type()) {
+    visit(ctx->basic_type());
     putTypeDecor(ctx,getTypeDecor(ctx->basic_type()));
-  else
+  }
+  else {
+    visit(ctx->array_decl());
     putTypeDecor(ctx,getTypeDecor(ctx->array_decl()));
+  }
   DEBUG_EXIT();
   return 0;
 }
+
+antlrcpp::Any SymbolsVisitor::visitBasic_type(AslParser::Basic_typeContext *ctx) {
+  DEBUG_ENTER();
+  TypesMgr::TypeId t = Types.createErrorTy();
+  if (ctx->INT()) t = Types.createIntegerTy();
+  if (ctx->BOOL()) t = Types.createBooleanTy();
+  if (ctx->FLOAT()) t = Types.createFloatTy();
+  if (ctx->CHAR()) t = Types.createCharacterTy();
+  putTypeDecor(ctx,t);
+  DEBUG_EXIT();
+  return 0;
+}
+
+antlrcpp::Any SymbolsVisitor::visitArray_decl(AslParser::Array_declContext *ctx) {
+  DEBUG_ENTER();
+  visit(ctx->basic_type());
+  int size = std::stoi(ctx->INTVAL() -> getText());   // size array
+  TypesMgr::TypeId elemType = getTypeDecor(ctx->basic_type());
+  TypesMgr::TypeId t = Types.createArrayTy(size,elemType);
+  putTypeDecor(ctx,t);
+  DEBUG_EXIT();
+  return 0;
+}
+
 
 // antlrcpp::Any SymbolsVisitor::visitStatements(AslParser::StatementsContext *ctx) {
 //   DEBUG_ENTER();

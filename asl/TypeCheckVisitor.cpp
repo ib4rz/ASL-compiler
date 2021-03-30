@@ -119,6 +119,7 @@ antlrcpp::Any TypeCheckVisitor::visitAssignStmt(AslParser::AssignStmtContext *ct
   visit(ctx->left_expr());
   visit(ctx->expr());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->left_expr());
+  //std::cout << Types.to_string(t1) << std::endl;
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
   if ((!Types.isErrorTy(t1)) && (!Types.isErrorTy(t2)) &&
       (!Types.copyableTypes(t1, t2)))
@@ -140,6 +141,8 @@ antlrcpp::Any TypeCheckVisitor::visitIfStmt(AslParser::IfStmtContext *ctx) {
   return 0;
 }
 
+antlrcpp::Any visitWhileStmt(AslParser::WhileStmtContext *ctx);
+
 antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->ident());
@@ -150,6 +153,8 @@ antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   DEBUG_EXIT();
   return 0;
 }
+
+//antlrcpp::Any TypeCheckVisitor::visitRetStmt(AslParser::RetStmtContext *ctx);
 
 antlrcpp::Any TypeCheckVisitor::visitReadStmt(AslParser::ReadStmtContext *ctx) {
   DEBUG_ENTER();
@@ -192,16 +197,59 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
   return 0;
 }
 
+antlrcpp::Any TypeCheckVisitor::visitParenthesis(AslParser::ParenthesisContext *ctx) {
+  DEBUG_ENTER();
+  visit(ctx->expr());
+  putTypeDecor(ctx, getTypeDecor(ctx->expr()));
+  putIsLValueDecor(ctx, getIsLValueDecor(ctx->expr()));
+  DEBUG_EXIT();
+  return 0;
+}
+
+//antlrcpp::Any TypeCheckVisitor::visitIndexer(AslParser::IndexerContext *ctx);
+
+antlrcpp::Any TypeCheckVisitor::visitUnary(AslParser::UnaryContext *ctx) {
+  DEBUG_ENTER();
+  visit(ctx->expr());
+  TypesMgr::TypeId t = getTypeDecor(ctx->expr());
+  if (ctx->NOT()) {
+    if ((!Types.isErrorTy(t)) && (!Types.isBooleanTy(t)))
+      Errors.incompatibleOperator(ctx->op);
+    t = Types.createBooleanTy();
+  }
+  else {
+    if ((!Types.isErrorTy(t)) && (!Types.isIntegerTy(t)) &&
+        (!Types.isFloatTy(t)))
+      Errors.incompatibleOperator(ctx->op);
+    Types.isIntegerTy(t) ? t = Types.createIntegerTy() : t = Types.createFloatTy();
+  }
+  putTypeDecor(ctx, t);
+  putIsLValueDecor(ctx, false);
+  DEBUG_EXIT();
+  return 0;
+}
+
 antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->expr(0));
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
   visit(ctx->expr(1));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
-  if (((!Types.isErrorTy(t1)) && (!Types.isNumericTy(t1))) ||
-      ((!Types.isErrorTy(t2)) && (!Types.isNumericTy(t2))))
-    Errors.incompatibleOperator(ctx->op);
   TypesMgr::TypeId t = Types.createIntegerTy();
+  // t1 & t2 must be integers in mod operation
+  if (ctx->MOD()) {
+    if (((!Types.isErrorTy(t1)) && (!Types.isErrorTy(t1))) ||
+        ((!Types.isErrorTy(t2)) && (!Types.isErrorTy(t2))))
+      Errors.incompatibleOperator(ctx->op);
+  }
+  else {
+    if (((!Types.isErrorTy(t1)) && (!Types.isNumericTy(t1))) ||
+        ((!Types.isErrorTy(t2)) && (!Types.isNumericTy(t2))))
+    Errors.incompatibleOperator(ctx->op);
+    // Type coercion int and float
+    if (Types.isFloatTy(t1) || Types.isFloatTy(t2))
+      t = Types.createFloatTy();
+  }
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
@@ -225,9 +273,30 @@ antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ct
   return 0;
 }
 
+antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx) {
+  DEBUG_ENTER();
+  visit(ctx->expr(0));
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
+  visit(ctx->expr(1));
+  TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
+  if ((!Types.isErrorTy(t1)) && (!Types.isErrorTy(t2)) &&
+      ((!Types.isBooleanTy(t1)) || (!Types.isBooleanTy(t2))))
+    Errors.incompatibleOperator(ctx->op);
+  TypesMgr::TypeId t = Types.createBooleanTy();
+  putTypeDecor(ctx, t);
+  putIsLValueDecor(ctx, false);
+  DEBUG_EXIT();
+  return 0;
+}
+
+
 antlrcpp::Any TypeCheckVisitor::visitValue(AslParser::ValueContext *ctx) {
   DEBUG_ENTER();
-  TypesMgr::TypeId t = Types.createIntegerTy();
+  TypesMgr::TypeId t = Types.createErrorTy();
+  if (ctx->INTVAL()) t = Types.createIntegerTy();
+  if (ctx->BOOLVAL())  t = Types.createBooleanTy();
+  if (ctx->FLOATVAL()) t = Types.createFloatTy();
+  if (ctx->CHARVAL())  t = Types.createCharacterTy();
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
