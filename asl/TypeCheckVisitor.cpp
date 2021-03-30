@@ -119,8 +119,8 @@ antlrcpp::Any TypeCheckVisitor::visitAssignStmt(AslParser::AssignStmtContext *ct
   visit(ctx->left_expr());
   visit(ctx->expr());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->left_expr());
-  //std::cout << Types.to_string(t1) << std::endl;
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
+  //std::cout << Types.to_string(t2) << std::endl;
   if ((!Types.isErrorTy(t1)) && (!Types.isErrorTy(t2)) &&
       (!Types.copyableTypes(t1, t2)))
     Errors.incompatibleAssignment(ctx->ASSIGN());
