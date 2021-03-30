@@ -293,6 +293,12 @@ antlrcpp::Any TypeCheckVisitor::visitFunctional(AslParser::FunctionalContext *ct
   }
   else {
     t2 = Types.getFuncReturnType(t1);
+    // Error assigning a void returning function
+    if (Types.isVoidFunction(t1)) {
+      Errors.isNotFunction(ctx->ident());
+      t2 = Types.createErrorTy();
+    }
+
     auto parameters = Types.getFuncParamsTypes(t1);
     for (unsigned int i = 0; i < parameters.size(); ++i) {
     if (!Types.equalTypes(parameters[i], getTypeDecor(ctx->expr(i))) &&
