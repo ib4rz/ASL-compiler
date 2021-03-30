@@ -77,7 +77,7 @@ statement
           // while-do-endwhile statement
         | WHILE expr 'do' statements ENDWHILE           # whileStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-        | ident '(' ')' ';'                             # procCall
+        | ident '(' (expr (',' expr)*)? ')' ';'         # procCall
           // Return statement   
         | RET expr? ';'                                 # retStmt
           // Read a variable

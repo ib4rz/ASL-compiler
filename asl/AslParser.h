@@ -210,6 +210,8 @@ public:
     ProcCallContext(StatementContext *ctx);
 
     IdentContext *ident();
+    std::vector<ExprContext *> expr();
+    ExprContext* expr(size_t i);
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 

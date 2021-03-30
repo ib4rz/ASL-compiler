@@ -77,9 +77,19 @@ antlrcpp::Any TypeCheckVisitor::visitProgram(AslParser::ProgramContext *ctx) {
 
 antlrcpp::Any TypeCheckVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   DEBUG_ENTER();
+  /**
+  TypesMgr::TypeId t;
+  if (ctx->basic_type() != NULL) {
+    visit(ctx->basic_type());
+    t = getTypeDecor(ctx->basic_type());
+  }
+  else
+    t = Types.createVoidTy();
+  Symbols.setCurrentFunctionTy(t);
+  */
   SymTable::ScopeId sc = getScopeDecor(ctx);
   Symbols.pushThisScope(sc);
-  // Symbols.print();
+  //Symbols.print();
   visit(ctx->statements());
   Symbols.popScope();
   DEBUG_EXIT();
@@ -159,6 +169,7 @@ antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   if (!Types.isFunctionTy(t1) && !Types.isErrorTy(t1)) {
     Errors.isNotCallable(ctx->ident());
   }
+  putIsLValueDecor(ctx, false); // se tiene que poner???
   DEBUG_EXIT();
   return 0;
 }
@@ -167,7 +178,6 @@ antlrcpp::Any TypeCheckVisitor::visitRetStmt(AslParser::RetStmtContext *ctx) {
   DEBUG_ENTER();
   if (ctx->expr() != NULL) {
     visit(ctx->expr());
-    //TypesMgr::TypeId t = getTypeDecor(ctx->expr());
   }
   DEBUG_EXIT();
   return 0;
@@ -276,16 +286,21 @@ antlrcpp::Any TypeCheckVisitor::visitFunctional(AslParser::FunctionalContext *ct
   visit(ctx->ident());  
   for (auto ctxParam : ctx->expr()) visit(ctxParam);
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
-  if (!Types.isFunctionTy(t1)) Errors.isNotCallable(ctx->ident());
+  TypesMgr::TypeId t2 = Types.createErrorTy();
+  // check if it is callable or not
+  if (!Types.isFunctionTy(t1)) {
+    Errors.isNotCallable(ctx->ident());
+  }
   else {
-    /**
+    t2 = Types.getFuncReturnType(t1);
     auto parameters = Types.getFuncParamsTypes(t1);
     for (unsigned int i = 0; i < parameters.size(); ++i) {
-
+    if (!Types.equalTypes(parameters[i], getTypeDecor(ctx->expr(i))) &&
+       (!Types.isFloatTy(parameters[i] && Types.isIntegerTy(getTypeDecor(ctx->expr(i))))))
+      Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
     }
-    **/
   }
-  putTypeDecor(ctx,t1);
+  putTypeDecor(ctx,t2);
   putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
   return 0;
