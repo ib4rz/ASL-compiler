@@ -199,8 +199,32 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
   DEBUG_ENTER();
   visit(ctx->ident());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
-  putTypeDecor(ctx, t1);
   bool b = getIsLValueDecor(ctx->ident());
+  bool accesAccept = !Types.isErrorTy(t1);
+
+  // Array access
+  if (ctx->expr() != NULL) {
+    visit(ctx->expr());
+    TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
+    // non array in array access
+    if (!Types.isErrorTy(t1) && !Types.isArrayTy(t1)) {
+      Errors.nonArrayInArrayAccess(ctx);
+      t1 = Types.createErrorTy();
+      accesAccept = false;
+      b = false;
+    }
+    // non integer index in array access
+    if (!Types.isErrorTy(t2) && !Types.isIntegerTy(t2)) {
+      Errors.nonIntegerIndexInArrayAccess(ctx->expr());
+      accesAccept = false;
+    }
+    if (accesAccept) {
+      t1 = Types.getArrayElemType(t1);
+      b = true;
+    }
+  }
+  
+  putTypeDecor(ctx, t1);
   putIsLValueDecor(ctx, b);
   DEBUG_EXIT();
   return 0;
@@ -215,7 +239,29 @@ antlrcpp::Any TypeCheckVisitor::visitParenthesis(AslParser::ParenthesisContext *
   return 0;
 }
 
-//antlrcpp::Any TypeCheckVisitor::visitIndexer(AslParser::IndexerContext *ctx);
+antlrcpp::Any TypeCheckVisitor::visitIndexer(AslParser::IndexerContext *ctx) {
+  DEBUG_ENTER();
+  visit(ctx->ident());
+  visit(ctx->expr());
+  TypesMgr::TypeId t = Types.createErrorTy();
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
+  TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
+  
+  // non integer index in array access
+  if(!Types.isErrorTy(t2) && !Types.isIntegerTy(t2))
+    Errors.nonIntegerIndexInArrayAccess(ctx->expr());
+
+  if (!Types.isErrorTy(t1)) {
+    if (!Types.isArrayTy(t1))
+      Errors.nonArrayInArrayAccess(ctx);
+    else t = Types.getArrayElemType(t1);
+  }
+
+  putTypeDecor(ctx, t);
+  putIsLValueDecor(ctx, true);
+  DEBUG_EXIT();
+  return 0;
+}
 
 antlrcpp::Any TypeCheckVisitor::visitUnary(AslParser::UnaryContext *ctx) {
   DEBUG_ENTER();

@@ -301,6 +301,16 @@ public:
    
   };
 
+  class  FunctionalContext : public ExprContext {
+  public:
+    FunctionalContext(ExprContext *ctx);
+
+    IdentContext *ident();
+    std::vector<ExprContext *> expr();
+    ExprContext* expr(size_t i);
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  ExprIdentContext : public ExprContext {
   public:
     ExprIdentContext(ExprContext *ctx);

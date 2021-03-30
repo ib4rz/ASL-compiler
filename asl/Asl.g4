@@ -42,7 +42,7 @@ function
         ;
 
 parameters
-        // (with parameters | with NO paramteres)
+        // (with NO parameters | with paramteres)
         : ( | ID ':' type (',' ID ':' type)*)
         ;
 declarations
@@ -94,7 +94,8 @@ left_expr
 
 // Grammar for expressions with boolean, relational and aritmetic operators
 expr    : '(' expr ')'                                  # parenthesis
-        | ident '[' expr ']'                            # indexer 
+        | ident '[' expr ']'                            # indexer
+        | ident '(' (expr (',' expr)*)? ')'             # functional
         | op=(NOT|ADD|SUB) expr                         # unary
         | expr op=(MUL|DIV|MOD) expr                    # arithmetic
         | expr op=(ADD|SUB) expr                        # arithmetic
