@@ -141,7 +141,16 @@ antlrcpp::Any TypeCheckVisitor::visitIfStmt(AslParser::IfStmtContext *ctx) {
   return 0;
 }
 
-antlrcpp::Any visitWhileStmt(AslParser::WhileStmtContext *ctx);
+antlrcpp::Any TypeCheckVisitor::visitWhileStmt(AslParser::WhileStmtContext *ctx) {
+  DEBUG_ENTER();
+  visit(ctx->expr());
+  TypesMgr::TypeId t = getTypeDecor(ctx->expr());
+  if ((!Types.isErrorTy(t)) && (!Types.isBooleanTy(t)))
+    Errors.booleanRequired(ctx);
+  visit(ctx->statements());
+  DEBUG_EXIT();
+  return 0;
+}
 
 antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   DEBUG_ENTER();
