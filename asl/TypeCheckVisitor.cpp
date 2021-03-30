@@ -163,7 +163,15 @@ antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   return 0;
 }
 
-//antlrcpp::Any TypeCheckVisitor::visitRetStmt(AslParser::RetStmtContext *ctx);
+antlrcpp::Any TypeCheckVisitor::visitRetStmt(AslParser::RetStmtContext *ctx) {
+  DEBUG_ENTER();
+  if (ctx->expr() != NULL) {
+    visit(ctx->expr());
+    //TypesMgr::TypeId t = getTypeDecor(ctx->expr());
+  }
+  DEBUG_EXIT();
+  return 0;
+}
 
 antlrcpp::Any TypeCheckVisitor::visitReadStmt(AslParser::ReadStmtContext *ctx) {
   DEBUG_ENTER();
@@ -259,6 +267,26 @@ antlrcpp::Any TypeCheckVisitor::visitIndexer(AslParser::IndexerContext *ctx) {
 
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, true);
+  DEBUG_EXIT();
+  return 0;
+}
+
+antlrcpp::Any TypeCheckVisitor::visitFunctional(AslParser::FunctionalContext *ctx) {
+  DEBUG_ENTER();
+  visit(ctx->ident());  
+  for (auto ctxParam : ctx->expr()) visit(ctxParam);
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
+  if (!Types.isFunctionTy(t1)) Errors.isNotCallable(ctx->ident());
+  else {
+    /**
+    auto parameters = Types.getFuncParamsTypes(t1);
+    for (unsigned int i = 0; i < parameters.size(); ++i) {
+
+    }
+    **/
+  }
+  putTypeDecor(ctx,t1);
+  putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
   return 0;
 }
