@@ -43,7 +43,7 @@ function
 
 parameters
         // (with parameters | with NO paramteres)
-        : (ID ':' type (',' ID ':' type)* | )
+        : ( | ID ':' type (',' ID ':' type)*)
         ;
 declarations
         : (variable_decl)*

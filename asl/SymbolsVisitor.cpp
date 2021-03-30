@@ -81,7 +81,10 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   std::string funcName = ctx->ID()->getText();
   SymTable::ScopeId sc = Symbols.pushNewScope(funcName);
   putScopeDecor(ctx, sc);
+  if (ctx->basic_type() != NULL) visit(ctx->basic_type());
+  visit(ctx->parameters());
   visit(ctx->declarations());
+  visit(ctx->statements());
   // Symbols.print();
   Symbols.popScope();
   std::string ident = ctx->ID()->getText();
@@ -89,12 +92,31 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   if (Symbols.findInCurrentScope(ident)) {
     Errors.declaredIdent(ctx->ID());
   }
-  // Add function to SymTable
   else {
+    TypesMgr::TypeId tRet;
+    // return type
+    if (ctx->basic_type() != NULL)
+      tRet = getTypeDecor(ctx->basic_type());
+    // return void
+    else tRet = Types.createVoidTy();
     std::vector<TypesMgr::TypeId> lParamsTy;
-    TypesMgr::TypeId tRet = Types.createVoidTy();
+    // parameters types
+    for (auto ctxParamTy: ctx->parameters()->type())
+      lParamsTy.push_back(getTypeDecor(ctxParamTy));
     TypesMgr::TypeId tFunc = Types.createFunctionTy(lParamsTy, tRet);
     Symbols.addFunction(ident, tFunc);
+  }
+  DEBUG_EXIT();
+  return 0;
+}
+
+antlrcpp::Any SymbolsVisitor::visitParameters(AslParser::ParametersContext *ctx) {
+  DEBUG_ENTER();
+  for (unsigned int i = 0; i < ctx->ID().size(); ++i) {
+    visit(ctx->type(i));
+    std::string id = ctx->ID(i)->getText();
+    TypesMgr::TypeId t = getTypeDecor(ctx->type(i));
+    Symbols.addParameter(id,t);
   }
   DEBUG_EXIT();
   return 0;

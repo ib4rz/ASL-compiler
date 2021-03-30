@@ -62,6 +62,7 @@ public:
   // Methods to visit each kind of node:
   antlrcpp::Any visitProgram(AslParser::ProgramContext *ctx);
   antlrcpp::Any visitFunction(AslParser::FunctionContext *ctx);
+  antlrcpp::Any visitParameters(AslParser::ParametersContext *ctx);
   antlrcpp::Any visitDeclarations(AslParser::DeclarationsContext *ctx);
   antlrcpp::Any visitVariable_decl(AslParser::Variable_declContext *ctx);
   antlrcpp::Any visitType(AslParser::TypeContext *ctx);
