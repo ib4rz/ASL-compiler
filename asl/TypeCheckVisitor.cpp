@@ -320,11 +320,17 @@ antlrcpp::Any TypeCheckVisitor::visitFunctional(AslParser::FunctionalContext *ct
       t2 = Types.createErrorTy();
     }
 
+  /**
+  if (Types.getNumOfParameters(t1) != (std::size_t)(ctx->expr()).size())
+    Errors.numberOfParameters(ctx->ident());
+    **/
+
     auto parameters = Types.getFuncParamsTypes(t1);
     for (unsigned int i = 0; i < parameters.size(); ++i) {
-    if (!Types.equalTypes(parameters[i], getTypeDecor(ctx->expr(i))) &&
-       (!Types.isFloatTy(parameters[i] && Types.isIntegerTy(getTypeDecor(ctx->expr(i))))))
-      Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
+      visit(ctx->expr(i));
+      if (!Types.equalTypes(parameters[i], getTypeDecor(ctx->expr(i))) &&
+        (!Types.isFloatTy(parameters[i] && Types.isIntegerTy(getTypeDecor(ctx->expr(i))))))
+        Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
     }
   }
   putTypeDecor(ctx,t2);
