@@ -77,7 +77,6 @@ antlrcpp::Any TypeCheckVisitor::visitProgram(AslParser::ProgramContext *ctx) {
 
 antlrcpp::Any TypeCheckVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   DEBUG_ENTER();
-  /**
   TypesMgr::TypeId t;
   if (ctx->basic_type() != NULL) {
     visit(ctx->basic_type());
@@ -86,7 +85,6 @@ antlrcpp::Any TypeCheckVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   else
     t = Types.createVoidTy();
   Symbols.setCurrentFunctionTy(t);
-  */
   SymTable::ScopeId sc = getScopeDecor(ctx);
   Symbols.pushThisScope(sc);
   //Symbols.print();
@@ -130,7 +128,6 @@ antlrcpp::Any TypeCheckVisitor::visitAssignStmt(AslParser::AssignStmtContext *ct
   visit(ctx->expr());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->left_expr());
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
-  //std::cout << Types.to_string(t2) << std::endl;
   if ((!Types.isErrorTy(t1)) && (!Types.isErrorTy(t2)) &&
       (!Types.copyableTypes(t1, t2)))
     Errors.incompatibleAssignment(ctx->ASSIGN());
@@ -178,6 +175,30 @@ antlrcpp::Any TypeCheckVisitor::visitRetStmt(AslParser::RetStmtContext *ctx) {
   DEBUG_ENTER();
   if (ctx->expr() != NULL) {
     visit(ctx->expr());
+
+    TypesMgr::TypeId t = getTypeDecor(ctx->expr());
+
+    // return types is Non-Primitive
+    if (!Types.isErrorTy(t) && !Types.isPrimitiveNonVoidTy(t))
+      Errors.incompatibleReturn(ctx->RET());
+
+    // return type does not match
+    else if (!Types.isErrorTy(t) && !Types.equalTypes(t, Symbols.getCurrentFunctionTy())) {
+      // float functions can return integers
+      if (!(Types.equalTypes(Types.createFloatTy(), Symbols.getCurrentFunctionTy()) &&
+               Types.equalTypes(Types.createIntegerTy(), t)))
+        Errors.incompatibleReturn(ctx->RET());
+    }
+    /*
+    // function was void
+    else if (!Types.isErrorTy(t) && Types.equalTypes(Types.createVoidTy(),Symbols.getCurrentFunctionTy()))
+      Errors.incompatibleReturn(ctx->RET());
+  */
+  }
+  // Returning void
+  else {
+    if (!Types.equalTypes(Types.createVoidTy(), Symbols.getCurrentFunctionTy()))
+      Errors.incompatibleReturn(ctx->RET());
   }
   DEBUG_EXIT();
   return 0;
