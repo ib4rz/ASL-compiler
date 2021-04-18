@@ -299,8 +299,8 @@ antlrcpp::Any TypeCheckVisitor::visitUnary(AslParser::UnaryContext *ctx) {
     t = Types.createBooleanTy();
   }
   else {  // -,+
-    // Check if t is float or integer
-    if (!Types.isErrorTy(t) && !Types.isIntegerTy(t) && !Types.isFloatTy(t))
+    // Check if t is numerical
+    if (!Types.isErrorTy(t) && !Types.isNumericTy(t))
       Errors.incompatibleOperator(ctx->op);
     Types.isIntegerTy(t) ? t = Types.createIntegerTy() : t = Types.createFloatTy();
   }
