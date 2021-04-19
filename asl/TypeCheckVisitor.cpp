@@ -102,6 +102,13 @@ antlrcpp::Any TypeCheckVisitor::visitIfStmt(AslParser::IfStmtContext *ctx) {
   return 0;
 }
 
+antlrcpp::Any TypeCheckVisitor::visitElseStat(AslParser::ElseStatContext *ctx) {
+  DEBUG_ENTER();
+  visit(ctx->statements());
+  DEBUG_EXIT();
+  return 0;
+}
+
 antlrcpp::Any TypeCheckVisitor::visitWhileStmt(AslParser::WhileStmtContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->expr());
@@ -192,10 +199,8 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
       t1 = Types.createErrorTy();
     }
     // Non integer index in array access
-    if (!Types.isIntegerTy(t2) && !Types.isErrorTy(t2)) {
+    if (!Types.isIntegerTy(t2) && !Types.isErrorTy(t2))
       Errors.nonIntegerIndexInArrayAccess(ctx->expr());
-      t1 = Types.createErrorTy();
-    }
     if (Types.isArrayTy(t1) && Types.isIntegerTy(t2))
       t1 = Types.getArrayElemType(t1);
   }
@@ -259,7 +264,8 @@ antlrcpp::Any TypeCheckVisitor::visitFunctional(AslParser::FunctionalContext *ct
     else {   // Check parameters passing
       auto parameters = Types.getFuncParamsTypes(t1);
       for (size_t i = 0; i < parameters.size(); ++i) {
-        if (!Types.copyableTypes(parameters[i], getTypeDecor(ctx->expr(i))))
+        TypesMgr::TypeId t = getTypeDecor(ctx->expr(i));
+        if (!Types.isErrorTy(t) && !Types.copyableTypes(parameters[i], t))
         Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
       }
     }
