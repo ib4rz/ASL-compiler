@@ -51,9 +51,9 @@ statement
           // Assignment
         : left_expr ASSIGN expr ';'                     # assignStmt
           // if-then-else statement (else is optional)
-        | IF expr THEN statements ENDIF                 # ifStmt
+        | IF expr THEN statements elseStat? ENDIF       # ifStmt
           // while-do-endwhile statement
-        | WHILE expr 'do' statements ENDWHILE           # whileStmt
+        | WHILE expr DO statements ENDWHILE           # whileStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
         | ident '(' (expr (',' expr)*)? ')' ';'         # procCall
           // Return statement   
@@ -68,6 +68,10 @@ statement
 // Grammar for left expressions (l-values in C++)
 left_expr
         : ident ('[' expr ']')?
+        ;
+
+elseStat
+        : ELSE statements
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
@@ -128,6 +132,7 @@ THEN      : 'then' ;
 ELSE      : 'else' ;
 ENDIF     : 'endif' ;
 WHILE     : 'while' ;
+DO        : 'do' ;
 ENDWHILE  : 'endwhile' ;
 FUNC      : 'func' ;
 ENDFUNC   : 'endfunc' ;

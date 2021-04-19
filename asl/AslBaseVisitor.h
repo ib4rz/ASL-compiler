@@ -87,6 +87,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitElseStat(AslParser::ElseStatContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitFunctional(AslParser::FunctionalContext *ctx) override {
     return visitChildren(ctx);
   }

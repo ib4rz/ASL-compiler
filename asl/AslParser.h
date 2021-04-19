@@ -13,10 +13,10 @@ class  AslParser : public antlr4::Parser {
 public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
-    T__7 = 8, T__8 = 9, ASSIGN = 10, ADD = 11, SUB = 12, MUL = 13, DIV = 14, 
-    MOD = 15, SEQ = 16, SNEQ = 17, SGT = 18, SGE = 19, SLE = 20, SLT = 21, 
-    AND = 22, NOT = 23, OR = 24, VAR = 25, INT = 26, BOOL = 27, FLOAT = 28, 
-    CHAR = 29, ARRAY = 30, IF = 31, THEN = 32, ELSE = 33, ENDIF = 34, WHILE = 35, 
+    T__7 = 8, ASSIGN = 9, ADD = 10, SUB = 11, MUL = 12, DIV = 13, MOD = 14, 
+    SEQ = 15, SNEQ = 16, SGT = 17, SGE = 18, SLE = 19, SLT = 20, AND = 21, 
+    NOT = 22, OR = 23, VAR = 24, INT = 25, BOOL = 26, FLOAT = 27, CHAR = 28, 
+    ARRAY = 29, IF = 30, THEN = 31, ELSE = 32, ENDIF = 33, WHILE = 34, DO = 35, 
     ENDWHILE = 36, FUNC = 37, ENDFUNC = 38, RET = 39, READ = 40, WRITE = 41, 
     INTVAL = 42, BOOLVAL = 43, FLOATVAL = 44, CHARVAL = 45, ID = 46, STRING = 47, 
     COMMENT = 48, WS = 49
@@ -25,8 +25,8 @@ public:
   enum {
     RuleProgram = 0, RuleFunction = 1, RuleParameters = 2, RuleDeclarations = 3, 
     RuleArray_decl = 4, RuleVariable_decl = 5, RuleType = 6, RuleBasic_type = 7, 
-    RuleStatements = 8, RuleStatement = 9, RuleLeft_expr = 10, RuleExpr = 11, 
-    RuleIdent = 12
+    RuleStatements = 8, RuleStatement = 9, RuleLeft_expr = 10, RuleElseStat = 11, 
+    RuleExpr = 12, RuleIdent = 13
   };
 
   AslParser(antlr4::TokenStream *input);
@@ -50,6 +50,7 @@ public:
   class StatementsContext;
   class StatementContext;
   class Left_exprContext;
+  class ElseStatContext;
   class ExprContext;
   class IdentContext; 
 
@@ -230,6 +231,7 @@ public:
 
     antlr4::tree::TerminalNode *WHILE();
     ExprContext *expr();
+    antlr4::tree::TerminalNode *DO();
     StatementsContext *statements();
     antlr4::tree::TerminalNode *ENDWHILE();
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -244,6 +246,7 @@ public:
     antlr4::tree::TerminalNode *THEN();
     StatementsContext *statements();
     antlr4::tree::TerminalNode *ENDIF();
+    ElseStatContext *elseStat();
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
@@ -289,6 +292,19 @@ public:
   };
 
   Left_exprContext* left_expr();
+
+  class  ElseStatContext : public antlr4::ParserRuleContext {
+  public:
+    ElseStatContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *ELSE();
+    StatementsContext *statements();
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ElseStatContext* elseStat();
 
   class  ExprContext : public antlr4::ParserRuleContext {
   public:

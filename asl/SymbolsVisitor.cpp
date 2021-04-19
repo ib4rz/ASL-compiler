@@ -55,7 +55,7 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   SymTable::ScopeId sc = Symbols.pushNewScope(funcName);
   putScopeDecor(ctx, sc);
   // Visits
-  if (ctx->basic_type() != NULL) visit(ctx->basic_type());
+  if (ctx->basic_type()) visit(ctx->basic_type());
   visit(ctx->parameters());
   visit(ctx->declarations());
   visit(ctx->statements());
@@ -68,7 +68,7 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   else {
     // Return type
     TypesMgr::TypeId tRet;
-    if (ctx->basic_type() != NULL)
+    if (ctx->basic_type())
       tRet = getTypeDecor(ctx->basic_type());
     else tRet = Types.createVoidTy();
     // Parameters types
@@ -88,8 +88,11 @@ antlrcpp::Any SymbolsVisitor::visitParameters(AslParser::ParametersContext *ctx)
   for (size_t i = 0; i < ctx->ID().size(); ++i) {
     visit(ctx->type(i));
     std::string id = ctx->ID(i)->getText();
+    if (Symbols.findInCurrentScope(id)) Errors.declaredIdent(ctx->ID(i));
+    else { 
     TypesMgr::TypeId t = getTypeDecor(ctx->type(i));
     Symbols.addParameter(id,t);
+    }
   }
   DEBUG_EXIT();
   return 0;
@@ -136,9 +139,9 @@ antlrcpp::Any SymbolsVisitor::visitBasic_type(AslParser::Basic_typeContext *ctx)
   DEBUG_ENTER();
   TypesMgr::TypeId t = Types.createErrorTy();
   if (ctx->INT()) t = Types.createIntegerTy();
-  if (ctx->BOOL()) t = Types.createBooleanTy();
-  if (ctx->FLOAT()) t = Types.createFloatTy();
-  if (ctx->CHAR()) t = Types.createCharacterTy();
+  else if (ctx->BOOL()) t = Types.createBooleanTy();
+  else if (ctx->FLOAT()) t = Types.createFloatTy();
+  else if (ctx->CHAR()) t = Types.createCharacterTy();
   putTypeDecor(ctx,t);
   DEBUG_EXIT();
   return 0;
@@ -147,7 +150,7 @@ antlrcpp::Any SymbolsVisitor::visitBasic_type(AslParser::Basic_typeContext *ctx)
 antlrcpp::Any SymbolsVisitor::visitArray_decl(AslParser::Array_declContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->basic_type());
-  int size = std::stoi(ctx->INTVAL()->getText());   // size array
+  unsigned int size = std::stoi(ctx->INTVAL()->getText());   // size array
   TypesMgr::TypeId elemType = getTypeDecor(ctx->basic_type());
   TypesMgr::TypeId t = Types.createArrayTy(size,elemType);
   putTypeDecor(ctx,t);
