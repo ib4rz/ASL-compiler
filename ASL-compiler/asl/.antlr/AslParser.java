@@ -1,4 +1,4 @@
-// Generated from d:\Usuario\Documentos\Universitat\2020-2021\Q2\CL\Laboratorio\ASL-compiler\asl\Asl.g4 by ANTLR 4.8
+// Generated from d:\Usuario\Documentos\Universitat\2020-2021\Q2\CL\Laboratorio\ASL-compiler\ASL-compiler\asl\Asl.g4 by ANTLR 4.8
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
