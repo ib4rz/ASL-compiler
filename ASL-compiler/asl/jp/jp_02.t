@@ -46,7 +46,7 @@ function main
      goto while1
   label endWhile1 :
      %14 = 0
-     %15 = end == %14
+     %15 = end ==. %14
      ifFalse %15 goto endif2
      writei aux
      %16 = '!'

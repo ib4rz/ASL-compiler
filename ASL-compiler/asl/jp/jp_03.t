@@ -36,12 +36,12 @@ function main
    call mul
    popparam 
    popparam 
-   popparam %3
-   %4 = 2
-   %5 = %3 * %4
-   writei %5
-   %6 = '.'
-   writec %6
+   popparam %2
+   %3 = 2
+   %4 = %2 * %3
+   writei %4
+   %5 = '.'
+   writec %5
    writeln
    return
 endfunction
