@@ -274,51 +274,18 @@ antlrcpp::Any CodeGenVisitor::visitFunctional(AslParser::FunctionalContext *ctx)
   std::string      addr = codAts.addr;
   std::string temp = "%"+codeCounters.newTEMP();
 
+  auto parameters = Types.getFuncParamsTypes(getTypeDecor(ctx->ident()));
+
   // Make space for function result
   if (!Types.isVoidFunction(getTypeDecor(ctx->ident()))) {
     code = code || instruction::PUSH();
   }
-
-  for (auto ctxParam : ctx->expr()) {
-    CodeAttribs && codAt = visit(ctxParam);
-    std::string         addrP = codAt.addr;
-    instructionList &   codeP = codAt.code;
-    code = code || codeP || instruction::PUSH(addrP);
-  }
-  code = code || instruction::CALL(addr);
-
-  // Removed passed parameters
-  for (std::size_t j = 0; j < (ctx->expr()).size(); ++j)
-    code = code || instruction::POP();
-
-  if (!Types.isVoidFunction(getTypeDecor(ctx->ident()))) {
-    temp = "%"+codeCounters.newTEMP();
-    code = code || instruction::POP(temp);
-  }
-
-  CodeAttribs codAtts(temp, "", code);
-
-  DEBUG_EXIT();
-  return codAtts;
-
-  /*
-  instructionList  code;
-  CodeAttribs && codAts = visit(ctx->ident());
-  std::string      addr = codAts.addr;
-
-  auto parameters = Types.getFuncParamsTypes(getTypeDecor(ctx->ident()));
-
-  if (!Types.isVoidFunction(getTypeDecor(ctx->ident()))) {
-    code = code || instruction::PUSH();
-  }
-
   if (ctx->expr().size() >= 1)  {
     int i = 0;
     for (auto ctxParam : ctx->expr()) {
       CodeAttribs && codAt = visit(ctxParam);
       std::string         addrP = codAt.addr;
       instructionList &   codeP = codAt.code;
-    
       if (Types.isIntegerTy(getTypeDecor(ctxParam)) && Types.isFloatTy(parameters[i])) {
         std::string temp = "%"+codeCounters.newTEMP();
         codeP = codeP || instruction::FLOAT(temp, addrP);
@@ -333,19 +300,22 @@ antlrcpp::Any CodeGenVisitor::visitFunctional(AslParser::FunctionalContext *ctx)
       ++i;
     }
     code = code || instruction::CALL(addr);
+    // Removed passed parameters
     for (std::size_t j = 0; j < (ctx->expr()).size(); ++j)
       code = code || instruction::POP();
 
     if (!Types.isVoidFunction(getTypeDecor(ctx->ident()))) {
-      std::string temp = "%"+codeCounters.newTEMP();
+      temp = "%"+codeCounters.newTEMP();
       code = code || instruction::POP(temp);
     }
   }
   else 
     code = code || instruction::CALL(ctx->ident()->ID()->getText());
+
+  CodeAttribs codAtts(temp, "", code);
+
   DEBUG_EXIT();
-  return code;
-  */
+  return codAtts;
 }
 
 antlrcpp::Any CodeGenVisitor::visitUnary(AslParser::UnaryContext *ctx) {
