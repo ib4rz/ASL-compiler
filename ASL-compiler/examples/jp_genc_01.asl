@@ -1,4 +1,4 @@
-func main()
+  func main()
   var a, b: int
   var end : bool
   var pi : float
