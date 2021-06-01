@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#echo "BEGIN examples-initial/typecheck"
-#for f in ../examples/jpbasic_chkt_*.asl; do
-#    echo $(basename "$f")
-#    ./asl "$f" | egrep ^L > tmp.err
-#    diff tmp.err "${f/asl/err}"
-#    rm -f tmp.err
-#done
-#echo "END   examples-initial/typecheck"
+echo "BEGIN examples-initial/typecheck"
+for f in ../examples/jpbasic_chkt_*.asl; do
+    echo $(basename "$f")
+    ./asl "$f" | egrep ^L > tmp.err
+    diff tmp.err "${f/asl/err}"
+    rm -f tmp.err
+done
+echo "END   examples-initial/typecheck"
 
 echo ""
 echo "BEGIN examples-full/typecheck"
@@ -50,13 +50,13 @@ echo "END   examples-full/typecheck"
 #done
 #echo "END   examples-initial/execution"
 
-# echo ""
-# echo "BEGIN examples-full/execution"
-# for f in ../examples/jp_genc_*.asl; do
-#     echo $(basename "$f")
-#     ./asl "$f" > tmp.t
-#     ../tvm/tvm tmp.t < "${f/asl/in}" > tmp.out
-#     diff tmp.out "${f/asl/out}"
-#     rm -f tmp.t tmp.out
-# done
-# echo "END   examples-full/execution"
+echo ""
+echo "BEGIN examples-full/execution"
+for f in ../examples/jp_genc_*.asl; do
+    echo $(basename "$f")
+    ./asl "$f" > tmp.t
+    ../tvm/tvm tmp.t < "${f/asl/in}" > tmp.out
+    diff tmp.out "${f/asl/out}"
+    rm -f tmp.t tmp.out
+done
+echo "END   examples-full/execution"

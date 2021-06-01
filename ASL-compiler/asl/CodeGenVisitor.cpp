@@ -231,6 +231,11 @@ antlrcpp::Any CodeGenVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   //std::string temp = "%"+codeCounters.newTEMP();
   auto parameters = Types.getFuncParamsTypes(getTypeDecor(ctx->ident()));
 
+  // Add space for the result ()
+  if (!Types.isVoidFunction(getTypeDecor(ctx->ident()))) {
+    code = code || instruction::PUSH();
+  }
+
   if (ctx->expr().size() >= 1)  {
     int i = 0;
     for (auto ctxParam : ctx->expr()) {
@@ -258,6 +263,11 @@ antlrcpp::Any CodeGenVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   else 
     code = code || instruction::CALL(ctx->ident()->ID()->getText());
 
+  // Discard the result
+  if (!Types.isVoidFunction(getTypeDecor(ctx->ident()))) {
+    code = code || instruction::POP();
+  }
+
   DEBUG_EXIT();
   return code;
 }
@@ -280,11 +290,31 @@ antlrcpp::Any CodeGenVisitor::visitReadStmt(AslParser::ReadStmtContext *ctx) {
   DEBUG_ENTER();
   CodeAttribs     && codAtsE = visit(ctx->left_expr());
   std::string          addr1 = codAtsE.addr;
-  // std::string          offs1 = codAtsE.offs;
+  std::string          offs1 = codAtsE.offs;
   instructionList &    code1 = codAtsE.code;
-  instructionList &     code = code1;
-  // TypesMgr::TypeId tid1 = getTypeDecor(ctx->left_expr());
-  code = code1 || instruction::READI(addr1);
+  instructionList       code = instructionList();
+  TypesMgr::TypeId tid1 = getTypeDecor(ctx->left_expr());
+
+  // Array
+  if (ctx->left_expr()->expr()) {
+    std::string temp = "%"+codeCounters.newTEMP();
+    if (Types.isIntegerTy(tid1) || Types.isBooleanTy(tid1))
+      code = code || instruction::READI(temp);
+    else if (Types.isFloatTy(tid1))
+      code = code || instruction::READF(temp);
+    else
+      code = code || instruction::READC(temp);
+    code = code || instruction::XLOAD(addr1, offs1, temp);
+  }
+  else {
+    if (Types.isIntegerTy(tid1) || Types.isBooleanTy(tid1))
+      code = code || instruction::READI(addr1);
+    else if (Types.isFloatTy(tid1))
+      code = code || instruction::READF(addr1);
+    else
+      code = code || instruction::READC(addr1);
+  }
+  code = code1 || code;
   DEBUG_EXIT();
   return code;
 }
