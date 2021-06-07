@@ -314,12 +314,12 @@ antlrcpp::Any CodeGenVisitor::visitWriteExpr(AslParser::WriteExprContext *ctx) {
   std::string         addr = codAt.addr;
   instructionList &   code = codAt.code;
   TypesMgr::TypeId t = getTypeDecor(ctx->expr());
-  if (Types.isFloatTy(t))
-    code = code || instruction::WRITEF(addr);
+  if (Types.isIntegerTy(t) || Types.isBooleanTy(t))
+    code = code || instruction::WRITEI(addr);
   else if (Types.isCharacterTy(t))
     code = code || instruction::WRITEC(addr);
   else 
-    code = code || instruction::WRITEI(addr);
+    code = code || instruction::WRITEF(addr);
   DEBUG_EXIT();
   return code;
 }

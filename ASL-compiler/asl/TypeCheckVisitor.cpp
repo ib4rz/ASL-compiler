@@ -97,7 +97,9 @@ antlrcpp::Any TypeCheckVisitor::visitIfStmt(AslParser::IfStmtContext *ctx) {
   // Check if the "if" condition is boolean
   if (!Types.isErrorTy(t) && !Types.isBooleanTy(t))
     Errors.booleanRequired(ctx);
-  visit(ctx->statements());
+  if (ctx->elseStat()) visit(ctx->elseStat());
+  else visit(ctx->statements());
+  //visit(ctx->statements());
   DEBUG_EXIT();
   return 0;
 }
